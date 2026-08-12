@@ -17,4 +17,4 @@
 - [x] Expand and verify the in-app safety documentation with a role matrix, data-handling statement, rate-limit policy, and module-specific technical limits.
 - [x] Add Vitest coverage for validation, authorization, allowlist enforcement, rate limiting, report composition, and local configuration parsing.
 - [x] Verify desktop and mobile interface states and test the production build and server procedures.
-- [ ] Save the first delivery checkpoint and prepare publication guidance.
+- [x] Save the first delivery checkpoint and prepare publication guidance.

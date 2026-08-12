@@ -27,6 +27,22 @@ pnpm dev
 
 The database schema lives in `drizzle/schema.ts`. Update the schema, generate and review a migration, then apply the reviewed SQL before relying on a new data model.
 
+## Production readiness and publication
+
+Before publishing a release, run the following checks from the project root:
+
+```bash
+pnpm test
+pnpm check
+pnpm build
+```
+
+When a schema change is required, update `drizzle/schema.ts`, generate the migration with `pnpm drizzle-kit generate`, review the generated SQL, and apply that reviewed migration through the managed database workflow. Never substitute an unreviewed schema push for a production migration and never place production secrets in source control.
+
+Authentication is provided by the managed OAuth configuration. The project owner is established from the platform-managed owner identity; do not hard-code account identifiers, session secrets, database URLs, or OAuth values in the client or repository. Deploy only after saving a checked project version, then use the project interface’s **Publish** control to release that version.
+
+> **Operational requirement:** Before activating a header review, record the program authorization, add the exact public asset to the allowlist, and have the workspace owner verify it. The release must not be used to perform broad discovery, exploit execution, credential attacks, or testing of systems without explicit authorization.
+
 ## Security model
 
 The detailed threat model, access matrix, and module limits are available in [`docs/security-model.md`](docs/security-model.md). To report a potential security issue in this project, use the contact and disclosure process published by the repository owner rather than including sensitive details in a public issue.
