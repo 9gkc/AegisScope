@@ -1,0 +1,37 @@
+import { PageHeading } from "@/components/AegisLayout";
+import { EmptyWorkspace, StatusPill, fieldClass, textareaClass } from "@/components/WorkspaceUI";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { trpc } from "@/lib/trpc";
+import { Archive, FilePenLine, FolderKanban, Plus, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
+type ProgramForm = { name: string; description: string; type: "bug_bounty" | "pentest" | "internal_review"; scopeNotes: string; status: "active" | "paused" | "completed" | "archived" };
+type ProgramRecord = ProgramForm & { id: number; updatedAt: Date };
+const initialForm: ProgramForm = { name: "", description: "", type: "bug_bounty", scopeNotes: "", status: "active" };
+
+function ProgramDialog({ program }: { program?: ProgramRecord }) {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<ProgramForm>(program ? { name: program.name, description: program.description ?? "", type: program.type, scopeNotes: program.scopeNotes ?? "", status: program.status } : initialForm);
+  const utils = trpc.useUtils();
+  const done = () => { setOpen(false); utils.programs.list.invalidate(); utils.dashboard.metrics.invalidate(); };
+  const create = trpc.programs.create.useMutation({ onSuccess: () => { toast.success("Program created"); setForm(initialForm); done(); }, onError: error => toast.error(error.message) });
+  const update = trpc.programs.update.useMutation({ onSuccess: () => { toast.success("Program updated"); done(); }, onError: error => toast.error(error.message) });
+  const submit = (event: React.FormEvent) => { event.preventDefault(); const data = { ...form, description: form.description || undefined, scopeNotes: form.scopeNotes || undefined }; if (program) update.mutate({ id: program.id, data }); else create.mutate(data); };
+  const pending = create.isPending || update.isPending;
+  return <Dialog open={open} onOpenChange={value => { setOpen(value); if (value && program) setForm({ name: program.name, description: program.description ?? "", type: program.type, scopeNotes: program.scopeNotes ?? "", status: program.status }); }}>
+    <DialogTrigger asChild>{program ? <Button variant="outline" size="sm"><FilePenLine className="mr-2 h-3.5 w-3.5" />Edit</Button> : <Button className="bg-sky-400 text-slate-950 hover:bg-sky-300"><Plus className="mr-2 h-4 w-4" />New program</Button>}</DialogTrigger>
+    <DialogContent className="max-w-xl border-white/[0.1] bg-[#0c1724] text-slate-100"><DialogHeader><DialogTitle className="font-display text-xl">{program ? "Edit authorized program" : "Create authorized program"}</DialogTitle></DialogHeader><form className="mt-3 space-y-4" onSubmit={submit}><div><Label htmlFor="program-name">Program name</Label><input id="program-name" required value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} placeholder="Acme public bug bounty" className={fieldClass} /></div><div className="grid gap-4 sm:grid-cols-2"><div><Label htmlFor="program-type">Engagement type</Label><select id="program-type" value={form.type} onChange={event => setForm({ ...form, type: event.target.value as ProgramForm["type"] })} className={fieldClass}><option value="bug_bounty">Bug bounty</option><option value="pentest">Penetration test</option><option value="internal_review">Internal review</option></select></div><div><Label htmlFor="program-status">Lifecycle</Label><select id="program-status" value={form.status} onChange={event => setForm({ ...form, status: event.target.value as ProgramForm["status"] })} className={fieldClass}><option value="active">Active</option><option value="paused">Paused</option><option value="completed">Completed</option><option value="archived">Archived</option></select></div></div><div><Label htmlFor="program-description">Description</Label><textarea id="program-description" value={form.description} onChange={event => setForm({ ...form, description: event.target.value })} placeholder="Purpose and authorized context for this engagement" className={textareaClass} /></div><div><Label htmlFor="scope-notes">Scope notes</Label><textarea id="scope-notes" value={form.scopeNotes} onChange={event => setForm({ ...form, scopeNotes: event.target.value })} placeholder="Authorized targets, dates, exclusions, and reporting requirements" className={textareaClass} /></div><Button disabled={pending} className="w-full bg-sky-400 text-slate-950 hover:bg-sky-300">{pending ? "Saving…" : program ? "Save program" : "Create program"}</Button></form></DialogContent>
+  </Dialog>;
+}
+
+export default function Programs() {
+  const programs = trpc.programs.list.useQuery();
+  const utils = trpc.useUtils();
+  const update = trpc.programs.update.useMutation({ onSuccess: () => { utils.programs.list.invalidate(); utils.dashboard.metrics.invalidate(); toast.success("Program status updated"); }, onError: error => toast.error(error.message) });
+  const archive = (id: number) => update.mutate({ id, data: { status: "archived" } });
+  return <><PageHeading eyebrow="Engagement management" title="Programs" description="Create a documented engagement before adding assets or findings. Scope notes create an explicit accountability boundary for every operation." action={<ProgramDialog />} />{programs.isLoading ? <div className="grid gap-4 lg:grid-cols-2"><Card className="h-48 animate-pulse border-white/[0.05] bg-white/[0.04]" /><Card className="h-48 animate-pulse border-white/[0.05] bg-white/[0.04]" /></div> : programs.data?.length ? <div className="grid gap-4 lg:grid-cols-2">{programs.data.map(program => <Card key={program.id} className="border-white/[0.08] bg-white/[0.035] p-5 shadow-none"><div className="flex gap-4"><div className="grid h-10 w-10 place-items-center rounded-xl border border-sky-300/15 bg-sky-400/[0.08] text-sky-200"><FolderKanban size={19} /></div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center justify-between gap-2"><h2 className="truncate font-display text-lg font-semibold text-slate-100">{program.name}</h2><StatusPill value={program.status} /></div><p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">{program.type.replaceAll("_", " ")}</p></div></div><p className="mt-5 min-h-12 text-sm leading-6 text-slate-400">{program.description || "No description recorded."}</p><div className="mt-5 rounded-lg border border-white/[0.06] bg-slate-950/25 px-3 py-2.5 text-xs leading-5 text-slate-500"><span className="font-medium text-slate-400">Scope: </span>{program.scopeNotes || "Add scope notes before active testing."}</div><div className="mt-5 flex flex-wrap justify-between gap-3"><span className="self-center text-xs text-slate-600">Updated {new Date(program.updatedAt).toLocaleDateString()}</span><div className="flex gap-2"><ProgramDialog program={program as ProgramRecord} />{program.status !== "archived" && <Button variant="outline" size="sm" onClick={() => archive(program.id)} disabled={update.isPending}><Archive className="mr-2 h-3.5 w-3.5" />Archive</Button>}</div></div></Card>)}</div> : <EmptyWorkspace icon={ShieldCheck} title="Create your first authorized program" description="Programs separate engagements, scope, and remediation context. They are required before an asset can enter the allowlist." />}</>;
+}
