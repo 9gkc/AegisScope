@@ -13,7 +13,7 @@
 - [x] Build local-only Terraform, Docker Compose, and Kubernetes configuration review that never uploads the submitted configuration.
 - [x] Build a public Portfolio page that displays verified project work, cybersecurity skills, GitHub links, and a registry for issuer-verifiable certifications without exposing private records.
 - [x] Add documentation pages for safety boundaries, responsible-use policy, privacy handling, and module-specific limits.
-- [ ] Add user-provided, issuer-verifiable certification entries to the public Portfolio when their names, issuers, dates, and verification URLs are available.
+- [x] Add user-provided, issuer-verifiable certification entries to the public Portfolio when their names, issuers, dates, and verification URLs are available.
 - [x] Expand and verify the in-app safety documentation with a role matrix, data-handling statement, rate-limit policy, and module-specific technical limits.
 - [x] Add Vitest coverage for validation, authorization, allowlist enforcement, rate limiting, report composition, and local configuration parsing.
 - [x] Verify desktop and mobile interface states and test the production build and server procedures.
