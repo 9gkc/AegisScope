@@ -18,3 +18,6 @@
 - [x] Add Vitest coverage for validation, authorization, allowlist enforcement, rate limiting, report composition, and local configuration parsing.
 - [x] Verify desktop and mobile interface states and test the production build and server procedures.
 - [x] Save the first delivery checkpoint and prepare publication guidance.
+- [ ] Verify the release checklist and prepare a GitHub-safe source export that excludes environment files, generated output, and local logs.
+- [ ] Create and push the current AegisScope source to a private GitHub repository under 9gkc, with repository metadata and sharing instructions.
+- [ ] Provide the final publication step and sharing links after the owner activates the managed public release.
