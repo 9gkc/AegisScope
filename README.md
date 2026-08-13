@@ -2,6 +2,12 @@
 
 > **AegisScope is an allowlist-first application-security operations workspace.** It helps an authenticated practitioner organise authorized programs, assets, findings, report drafts, and low-impact security reviews without turning the workspace into a broad scanning or exploitation tool.
 
+## Public product preview
+
+![AegisScope public portfolio view presenting application-security operations, professional principles, and privacy-first project boundaries](docs/images/aegisscope-public-portfolio.webp)
+
+**[Open the public AegisScope experience](https://aegisappsec-apcnhon3.manus.space)** to review the published workspace context. Private programs, assets, findings, reports, and reviews remain available only to authenticated users within the authorized workspace.
+
 ## Product boundary
 
 | Module | Purpose | Enforced boundary |
